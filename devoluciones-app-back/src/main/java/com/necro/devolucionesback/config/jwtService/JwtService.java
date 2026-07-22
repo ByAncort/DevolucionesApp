@@ -1,0 +1,89 @@
+package com.necro.devolucionesback.config.jwtService;
+
+import com.necro.devolucionesback.model.User;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import java.security.Key;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.function.Function;
+
+@Service
+public class JwtService {
+    @Value("${auth.app.jwtSecret}")
+    private String jwtSecret;
+    @Value("${auth.app.jwtExpirationMs}")
+    private int jwtExpirationMs;
+
+    public String getUsernameFromToken(String token) {
+        return getClaims(token, Claims::getSubject);
+    }
+
+    public String getToken(UserDetails user, Long tenantId) {
+        HashMap<String, Object> claims = new HashMap<>();
+        if (tenantId != null) {
+            claims.put("tenantId", tenantId);
+        }
+        return generateTokenFromUsername(claims, user);
+    }
+
+    public Long getTenantIdFromToken(String token) {
+        return getClaims(token, claims -> {
+            Object tenantId = claims.get("tenantId");
+            return tenantId != null ? Long.valueOf(tenantId.toString()) : null;
+        });
+    }
+
+    public Key getSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    private String generateTokenFromUsername(HashMap<String, Object> extraClaims, UserDetails user) {
+        Date issuedAt = new Date();
+        Date expiration = new Date(System.currentTimeMillis() + jwtExpirationMs);
+        extraClaims.put("issuedAt", issuedAt);
+        extraClaims.put("expiration", expiration);
+
+        return Jwts.builder()
+                .claims(extraClaims)
+                .subject(user.getUsername())
+                .issuedAt(issuedAt)
+                .expiration(expiration)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    private Claims getAllClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public <T> T getClaims(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = getAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    public boolean isTokenExpired(String token) {
+        return getExpiration(token).before(new Date());
+    }
+
+    private Date getExpiration(String token) {
+        return getClaims(token, Claims::getExpiration);
+    }
+
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = getUsernameFromToken(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    }
+}

@@ -2,7 +2,7 @@ package com.necro.devolucionesback.controller;
 
 import com.necro.devolucionesback.dto.AuthResponse;
 import com.necro.devolucionesback.dto.LoginRequest;
-import com.necro.devolucionesback.service.AuthService;
+import com.necro.devolucionesback.config.jwtService.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
