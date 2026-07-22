@@ -55,7 +55,8 @@ public class AuthService {
                     )
             );
 
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal()String token = jwtService.getToken(userDetails);
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String token = jwtService.getToken(userDetails);
 
             return AuthResponse.builder()
                     .issuedAt(new Date())
