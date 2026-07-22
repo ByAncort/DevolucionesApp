@@ -22,10 +22,5 @@ public class User {
 
     private String password;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tenant_id")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private Tenant tenant;
 
 }

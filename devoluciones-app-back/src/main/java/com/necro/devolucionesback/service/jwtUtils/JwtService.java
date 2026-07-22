@@ -25,20 +25,12 @@ public class JwtService {
         return getClaims(token, Claims::getSubject);
     }
 
-    public String getToken(UserDetails user, Long tenantId) {
+    public String getToken(UserDetails user) {
         HashMap<String, Object> claims = new HashMap<>();
-        if (tenantId != null) {
-            claims.put("tenantId", tenantId);
-        }
         return generateTokenFromUsername(claims, user);
     }
 
-    public Long getTenantIdFromToken(String token) {
-        return getClaims(token, claims -> {
-            Object tenantId = claims.get("tenantId");
-            return tenantId != null ? Long.valueOf(tenantId.toString()) : null;
-        });
-    }
+
 
     public Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);

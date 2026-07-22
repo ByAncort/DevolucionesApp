@@ -55,9 +55,7 @@ public class AuthService {
                     )
             );
 
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            Long tenantId = user.getTenant() != null ? user.getTenant().getId() : null;
-            String token = jwtService.getToken(userDetails, tenantId);
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal()String token = jwtService.getToken(userDetails);
 
             return AuthResponse.builder()
                     .issuedAt(new Date())
@@ -89,7 +87,6 @@ public class AuthService {
     private AuthResponse buildAuthResponse(User user) {
         Instant issuedAt = Instant.now();
         Instant expiration = issuedAt.plusMillis(jwtExpirationMs);
-        Long tenantId = user.getTenant() != null ? user.getTenant().getId() : null;
 
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
@@ -97,7 +94,7 @@ public class AuthService {
                 Collections.emptyList()
         );
 
-        String token = jwtService.getToken(userDetails, tenantId);
+        String token = jwtService.getToken(userDetails);
 
         return AuthResponse.builder()
                 .token(token)
