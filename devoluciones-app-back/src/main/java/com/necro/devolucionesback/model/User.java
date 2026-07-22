@@ -20,6 +20,8 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    private String password;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id")
     @ToString.Exclude
