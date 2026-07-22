@@ -1,4 +1,4 @@
-package com.necro.devolucionesback.config.jwtService;
+package com.necro.devolucionesback.service.jwtUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;

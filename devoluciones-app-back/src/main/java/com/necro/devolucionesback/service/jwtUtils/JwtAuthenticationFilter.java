@@ -1,4 +1,4 @@
-package com.necro.devolucionesback.config.jwtService;
+package com.necro.devolucionesback.service.jwtUtils;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;

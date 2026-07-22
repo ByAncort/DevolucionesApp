@@ -1,8 +1,8 @@
 package com.necro.devolucionesback.config;
 
-import com.necro.devolucionesback.config.jwtService.AccessDeniedHandlerJwt;
-import com.necro.devolucionesback.config.jwtService.AuthEntryPointJwt;
-import com.necro.devolucionesback.config.jwtService.JwtAuthenticationFilter;
+import com.necro.devolucionesback.service.jwtUtils.AccessDeniedHandlerJwt;
+import com.necro.devolucionesback.service.jwtUtils.AuthEntryPointJwt;
+import com.necro.devolucionesback.service.jwtUtils.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -45,11 +45,11 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/auth/**",
-                                "/api/v1/users/setup-password",
+                                "/api/v1/auth/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/favicon.ico"
+                                "/favicon.ico",
+                                "/error"
                         ).permitAll()
                         .requestMatchers(
                                 org.springframework.http.HttpMethod.GET,

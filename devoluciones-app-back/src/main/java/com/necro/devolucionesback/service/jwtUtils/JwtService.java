@@ -1,6 +1,5 @@
-package com.necro.devolucionesback.config.jwtService;
+package com.necro.devolucionesback.service.jwtUtils;
 
-import com.necro.devolucionesback.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
