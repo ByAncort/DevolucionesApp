@@ -36,12 +36,20 @@ public class Solicitud {
     @Column(name="cuenta_destino", nullable = false)
     private String cuentaDestino;
 
+    // idealmente es mejor una entidad si los estados mutan
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
     private Estado estado;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "origen", nullable = false)
+    private Origen origen;
 
     @Column(name = "motivo_rechazo")
     private String motivoRechazo;
+
+    @Builder.Default
+    @Column(name = "veces_reabierta", nullable = false)
+    private int vecesReabierta = 0;
 
     // campos de auditoria testear que se generen siempre
 
@@ -50,13 +58,13 @@ public class Solicitud {
     private User createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "actualizada_por", updatable = false)
+    @JoinColumn(name = "actualizada_por", updatable = true)
     private User updatedBy;
 
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "fecha_actualizacion", nullable = false, updatable = false)
+    @Column(name = "fecha_actualizacion", nullable = false, updatable = true)
     private LocalDateTime updatedAt;
 
     @PrePersist
@@ -66,6 +74,10 @@ public class Solicitud {
         if (this.estado == null) {
             this.estado = Estado.BORRADOR;
         }
+        if (this.origen == null) {
+            this.origen = Origen.MANUAL;
+        }
+
     }
     @PreUpdate
     protected void onUpdate() {

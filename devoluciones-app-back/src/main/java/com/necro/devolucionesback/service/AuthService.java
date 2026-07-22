@@ -5,7 +5,9 @@ import com.necro.devolucionesback.service.jwtUtils.JwtService;
 import com.necro.devolucionesback.dto.LoginRequest;
 import com.necro.devolucionesback.dto.AuthResponse;
 import com.necro.devolucionesback.dto.RegisterRequest;
+import com.necro.devolucionesback.model.Role;
 import com.necro.devolucionesback.model.User;
+import com.necro.devolucionesback.repository.RoleRepository;
 import com.necro.devolucionesback.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +19,15 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.management.relation.RoleNotFoundException;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,6 +39,7 @@ public class AuthService {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
@@ -92,7 +95,9 @@ public class AuthService {
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                Collections.emptyList()
+                user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName()))
+                        .collect(Collectors.toList())
         );
 
         String token = jwtService.getToken(userDetails);
@@ -114,10 +119,15 @@ public class AuthService {
         if (userRequest == null) {
             throw new IllegalArgumentException("RegisterRequest no puede ser nulo");
         }
+
+        Role defaultRole = roleRepository.findByName("ANALISTA")
+                .orElseThrow(() -> new RuntimeException("Default role ANALISTA not found"));
+
         return User.builder()
                 .username(userRequest.getUsername())
                 .email(userRequest.getEmail())
                 .password(passwordEncoder.encode(userRequest.getPassword()))
+                .roles(Set.of(defaultRole))
                 .build();
     }
 

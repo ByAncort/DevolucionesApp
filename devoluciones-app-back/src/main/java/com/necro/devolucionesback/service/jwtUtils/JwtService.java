@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
@@ -27,7 +29,16 @@ public class JwtService {
 
     public String getToken(UserDetails user) {
         HashMap<String, Object> claims = new HashMap<>();
+        List<String> roles = user.getAuthorities().stream()
+                .map(auth -> auth.getAuthority())
+                .collect(Collectors.toList());
+        claims.put("roles", roles);
         return generateTokenFromUsername(claims, user);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> getRolesFromToken(String token) {
+        return getClaims(token, claims -> claims.get("roles", List.class));
     }
 
 
