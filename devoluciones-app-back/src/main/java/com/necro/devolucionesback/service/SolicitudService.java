@@ -72,9 +72,9 @@ public class SolicitudService {
         return eventoInicial;
     }
 
-    public synchronized String generarFolio() {
+    public String generarFolio() {
         int anioActual = LocalDate.now().getYear();
-        long correlativo = solicitudRepository.countByAnio(anioActual) + 1;
+        long correlativo = solicitudRepository.nextFolio();
         return String.format("DEV-%d-%06d", anioActual, correlativo);
     }
 

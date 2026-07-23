@@ -11,4 +11,7 @@ import org.springframework.stereotype.Repository;
 public interface SolicitudRepository extends JpaRepository<Solicitud, Long>, JpaSpecificationExecutor<Solicitud> {
     @Query("SELECT COUNT(s) FROM Solicitud s WHERE YEAR(s.createdAt) = :anio")
     long countByAnio(@Param("anio") int anio);
+
+    @Query(value = "SELECT nextval('folio_seq')", nativeQuery = true)
+    long nextFolio();
 }
