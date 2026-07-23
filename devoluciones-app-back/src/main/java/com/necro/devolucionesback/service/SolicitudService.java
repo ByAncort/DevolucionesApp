@@ -1,5 +1,6 @@
 package com.necro.devolucionesback.service;
 
+import com.necro.devolucionesback.dto.EventoResponseDTO;
 import com.necro.devolucionesback.dto.SolicitudRequestDTO;
 import com.necro.devolucionesback.dto.SolicitudResponseDTO;
 import com.necro.devolucionesback.exception.InvalidStateTransitionException;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -102,6 +104,18 @@ public class SolicitudService {
         return SolicitudResponseDTO.fromEntity(solicitud);
     }
 
+    public List<EventoResponseDTO> getHistorial(Long solicitudId) {
+        if (!solicitudRepository.existsById(solicitudId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Solicitud no encontrada con id: " + solicitudId);
+        }
+        return eventoSolicitudRepository.findBySolicitudIdOrderByFechaAsc(solicitudId)
+                .stream()
+                .map(EventoResponseDTO::fromEntity)
+                .toList();
+    }
+
     public SolicitudResponseDTO updateSolicitud(Long id, @Valid SolicitudRequestDTO requestDTO) {
 
         Solicitud solicitud=solicitudRepository.findById(id)
@@ -109,10 +123,9 @@ public class SolicitudService {
                         org.springframework.http.HttpStatus.NOT_FOUND,
                         "Solicitud no encontrada con id: " + id));
 
-        if(solicitud.getEstado().equals(Estado.PAGADA) || solicitud.getEstado().equals(Estado.ANULADA)){
+        if (!solicitud.getEstado().equals(Estado.BORRADOR)) {
             throw new InvalidStateTransitionException(
-                    "No se puede actualizar la solicitud "+ id + ": estado actual es " + solicitud.getEstado().getLabel()
-            );
+                    "No se puede actualizar la solicitud " + id + ": solo editable en BORRADOR, estado actual es " + solicitud.getEstado().getLabel());
         }
 
         Banco banco = bancoRepository.findById(requestDTO.bancoDestinoId())
