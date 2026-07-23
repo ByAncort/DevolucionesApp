@@ -41,6 +41,5 @@ public class EventoSolicitud {
     @PrePersist
     protected void onCreate() {
         this.fecha = LocalDateTime.now();
-        this.estadoOrigen = Estado.BORRADOR;
     }
 }

@@ -56,15 +56,15 @@ public class SolicitudService {
                 .build();
 
         solicitud = solicitudRepository.save(solicitud);
-        registerEvento(solicitud, currentUser,"Solicitud creada en el sistema");
+        registerEvento(solicitud, currentUser, null, "Solicitud creada en el sistema");
         return SolicitudResponseDTO.fromEntity(solicitud);
     }
     
-    public EventoSolicitud registerEvento(Solicitud solicitud,User currentUser,String comentario){
+    public EventoSolicitud registerEvento(Solicitud solicitud, User currentUser, Estado estadoOrigen, String comentario) {
         EventoSolicitud eventoInicial = EventoSolicitud.builder()
                 .solicitud(solicitud)
                 .usuario(currentUser)
-                 // Es el evento de creación inicial
+                .estadoOrigen(estadoOrigen)
                 .estadoDestino(solicitud.getEstado())
                 .comentario(comentario)
                 .build();
@@ -121,7 +121,7 @@ public class SolicitudService {
         solicitud.setCuentaDestino(requestDTO.cuentaDestino());
 
         solicitudRepository.save(solicitud);
-        registerEvento(solicitud, currentUser,"Solicitud actualizada en el sistema");
+        registerEvento(solicitud, currentUser, solicitud.getEstado(), "Solicitud actualizada en el sistema");
         return SolicitudResponseDTO.fromEntity(solicitud);
     }
 
@@ -206,7 +206,7 @@ public class SolicitudService {
         solicitud.setUpdatedBy(currentUser);
         solicitudRepository.save(solicitud);
         // R6: registrar evento en la misma transaccion
-        registerEvento(solicitud, currentUser, comentario);
+        registerEvento(solicitud, currentUser, estadoActual, comentario);
 
         return SolicitudResponseDTO.fromEntity(solicitud);
     }
