@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AuthErrorResponse {
 
-    private LocalDateTime timestamp;
+    private String timestamp;
     private int status;
     private String error;
     private String message;
@@ -20,7 +20,7 @@ public class AuthErrorResponse {
 
     public static AuthErrorResponse of(int status, String error, String message, String path) {
         return AuthErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(LocalDateTime.now().toString())
                 .status(status)
                 .error(error)
                 .message(message)

@@ -1,6 +1,8 @@
 package com.necro.devolucionesback.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -49,8 +51,32 @@ public class GlobalExceptionHandler {
                 errors, request.getServletPath());
     }
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
+        String errors = ex.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining(", "));
+        log.error("Constraint violation: {}", errors);
+        return buildResponse(HttpStatus.BAD_REQUEST.value(), "Bad Request",
+                errors, request.getServletPath());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+        log.error("Validation error: {}", ex.getMessage());
+        return buildResponse(HttpStatus.BAD_REQUEST.value(), "Bad Request",
+                ex.getMessage(), request.getServletPath());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex, HttpServletRequest request) {
+        log.error("Unexpected error: {}", ex.getMessage(), ex);
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error",
+                "An unexpected error occurred", request.getServletPath());
+    }
+    
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> runtimeException(Exception ex, HttpServletRequest request) {
         log.error("Unexpected error: {}", ex.getMessage(), ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error",
                 "An unexpected error occurred", request.getServletPath());
