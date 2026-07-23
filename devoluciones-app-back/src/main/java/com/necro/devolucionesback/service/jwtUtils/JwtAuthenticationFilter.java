@@ -1,5 +1,7 @@
 package com.necro.devolucionesback.service.jwtUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.necro.devolucionesback.dto.AuthErrorResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,6 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtService jwtUtils;
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -53,7 +57,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             logger.error("Error en la autenticación: {}", e.getMessage());
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error en la autenticación");
+            writeErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Error en la autenticación", request.getServletPath());
         }
     }
 
@@ -77,21 +82,43 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return false;
         } catch (ExpiredJwtException e) {
             logger.error("Token expirado: {}", e.getMessage());
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token expirado");
+            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "Token expirado", request.getServletPath());
         } catch (MalformedJwtException e) {
             logger.error("Token inválido: {}", e.getMessage());
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Token inválido");
+            writeErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                    "Token inválido", request.getServletPath());
         } catch (SignatureException e) {
             logger.error("Firma del token no válida: {}", e.getMessage());
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Firma del token no válida");
+            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "Firma del token no válida", request.getServletPath());
         } catch (IllegalArgumentException e) {
             logger.error("Token ausente o incorrecto: {}", e.getMessage());
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Token ausente o incorrecto");
+            writeErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,
+                    "Token ausente o incorrecto", request.getServletPath());
         } catch (UsernameNotFoundException e) {
             logger.error("Usuario no encontrado: {}", e.getMessage());
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Usuario no encontrado");
+            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "Usuario no encontrado", request.getServletPath());
         }
         return false;
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, int status, String message, String path)
+            throws IOException {
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(status);
+
+        AuthErrorResponse body = AuthErrorResponse.of(status, getErrorLabel(status), message, path);
+        mapper.writeValue(response.getOutputStream(), body);
+    }
+
+    private String getErrorLabel(int status) {
+        return switch (status) {
+            case HttpServletResponse.SC_UNAUTHORIZED -> "Unauthorized";
+            case HttpServletResponse.SC_BAD_REQUEST -> "Bad Request";
+            default -> "Internal Server Error";
+        };
     }
 
     private String getTokenFromRequest(HttpServletRequest request){

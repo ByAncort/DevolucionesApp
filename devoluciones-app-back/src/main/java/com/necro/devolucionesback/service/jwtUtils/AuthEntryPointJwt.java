@@ -1,6 +1,7 @@
 package com.necro.devolucionesback.service.jwtUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.necro.devolucionesback.dto.AuthErrorResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,13 +13,12 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
@@ -28,14 +28,13 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        final Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-        body.put("error", "Unauthorized");
-        body.put("message", authException.getMessage());
-        body.put("path", request.getServletPath());
+        AuthErrorResponse body = AuthErrorResponse.of(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Unauthorized",
+                authException.getMessage(),
+                request.getServletPath()
+        );
 
-        final ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(response.getOutputStream(), body);
     }
-
 }

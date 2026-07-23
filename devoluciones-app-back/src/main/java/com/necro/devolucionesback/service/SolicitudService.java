@@ -51,6 +51,7 @@ public class SolicitudService {
 
         return SolicitudResponseDTO.fromEntity(solicitud);
     }
+    
     public EventoSolicitud registerEvento(Solicitud solicitud){
         EventoSolicitud eventoInicial = EventoSolicitud.builder()
                 .solicitud(solicitud)

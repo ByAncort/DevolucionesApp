@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
         return new org.springframework.security.core.userdetails.User(
@@ -40,7 +40,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new IllegalStateException("No authenticated user found");
         }
         String username = auth.getName();
-        return userRepository.findByEmail(username)
+        return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 }
