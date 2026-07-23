@@ -40,7 +40,7 @@ public class DataInitializer implements CommandLineRunner {
         );
         for (String nombre : bancos) {
             if (bancoRepository.findByNombreBancoIgnoreCase(nombre).isEmpty()) {
-                bancoRepository.save(Banco.builder().nombre_banco(nombre).build());
+                bancoRepository.save(Banco.builder().nombreBanco(nombre).build());
                 log.info("Created banco: {}", nombre);
             }
         }

@@ -12,5 +12,6 @@ public class Banco {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String nombre_banco;
+    @Column(name = "nombre_banco")
+    private String nombreBanco;
 }

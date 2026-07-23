@@ -2,10 +2,6 @@ package com.necro.devolucionesback.dto;
 
 import com.necro.devolucionesback.model.Estado;
 import com.necro.devolucionesback.model.Solicitud;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -39,7 +35,7 @@ public record SolicitudResponseDTO(
             solicitud.getMonto(),
 
             solicitud.getBancoDestino() != null ? solicitud.getBancoDestino().getId() : null,
-            solicitud.getBancoDestino() != null ? solicitud.getBancoDestino().getNombre_banco() : null,
+            solicitud.getBancoDestino() != null ? solicitud.getBancoDestino().getNombreBanco() : null,
 
             solicitud.getCuentaDestino(),
             solicitud.getEstado(),
