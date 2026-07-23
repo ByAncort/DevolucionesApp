@@ -109,6 +109,12 @@ public class SolicitudService {
                         org.springframework.http.HttpStatus.NOT_FOUND,
                         "Solicitud no encontrada con id: " + id));
 
+        if(solicitud.getEstado().equals(Estado.PAGADA) || solicitud.getEstado().equals(Estado.ANULADA)){
+            throw new InvalidStateTransitionException(
+                    "No se puede actualizar la solicitud "+ id + ": estado actual es " + solicitud.getEstado().getLabel()
+            );
+        }
+
         Banco banco = bancoRepository.findById(requestDTO.bancoDestinoId())
                 .orElseThrow(()-> new IllegalArgumentException("El banco seleccionado no existe"));
         User currentUser = customUserDetailsService.getCurrentUser();
