@@ -38,4 +38,9 @@ public class SolicitudController {
 
         return solicitudService.findAll(estado, rut, origen, fechaInicio, fechaFin, page, size);
     }
+
+    @GetMapping("/{id}")
+    public SolicitudResponseDTO findById(@PathVariable Long id) {
+        return solicitudService.findById(id);
+    }
 }
