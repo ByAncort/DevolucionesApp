@@ -144,17 +144,12 @@ public class SolicitudService {
 
         switch (accion.toLowerCase()) {
             case "enviar":
-                // R1: BORRADOR → EN_REVISION
-                // R2: basta ANALISTA
                 requireEstado(solicitud, Estado.BORRADOR, "enviar");
                 comentario = "Solicitud enviada a revisión";
                 solicitud.setEstado(Estado.EN_REVISION);
                 break;
 
             case "aprobar":
-                // R1: EN_REVISION → APROBADA
-                // R2: requiere SUPERVISOR
-                // R7: supervisor no puede ser el creador
                 requireEstado(solicitud, Estado.EN_REVISION, "aprobar");
                 requireSupervisor(currentUser);
                 requireNoCreador(solicitud, currentUser);
@@ -163,9 +158,6 @@ public class SolicitudService {
                 break;
 
             case "rechazar":
-                // R1: EN_REVISION → RECHAZADA
-                // R2: requiere SUPERVISOR
-                // R3: motivo_rechazo obligatorio
                 requireEstado(solicitud, Estado.EN_REVISION, "rechazar");
                 requireSupervisor(currentUser);
                 requireMotivoRechazo(motivoRechazo);
@@ -175,8 +167,6 @@ public class SolicitudService {
                 break;
 
             case "pagar":
-                // R1: APROBADA → PAGADA
-                // R2: requiere SUPERVISOR
                 requireEstado(solicitud, Estado.APROBADA, "pagar");
                 requireSupervisor(currentUser);
                 comentario = "Solicitud pagada";
@@ -184,17 +174,12 @@ public class SolicitudService {
                 break;
 
             case "anular":
-                // R1: BORRADOR → ANULADA
-                // R2: basta ANALISTA
                 requireEstado(solicitud, Estado.BORRADOR, "anular");
                 comentario = "Solicitud anulada";
                 solicitud.setEstado(Estado.ANULADA);
                 break;
 
             case "reabrir":
-                // R1: RECHAZADA → BORRADOR
-                // R2: basta ANALISTA
-                // R4: una sola vez (vecesReabierta)
                 requireEstado(solicitud, Estado.RECHAZADA, "reabrir");
                 requireReabrirDisponible(solicitud);
                 solicitud.setVecesReabierta(solicitud.getVecesReabierta() + 1);
@@ -211,10 +196,16 @@ public class SolicitudService {
 
         solicitud.setUpdatedBy(currentUser);
         solicitudRepository.save(solicitud);
-        // R6: registrar evento en la misma transaccion
         registerEvento(solicitud, currentUser, estadoActual, comentario);
 
         return SolicitudResponseDTO.fromEntity(solicitud);
+    }
+
+    private Solicitud findOrThrow(Long id) {
+        return solicitudRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Solicitud no encontrada con id: " + id));
     }
 
     private void requireEstado(Solicitud solicitud, Estado esperado, String accion) {

@@ -1,6 +1,6 @@
 package com.necro.devolucionesback.controller;
 
-import com.necro.devolucionesback.dto.CambioEstadoRequest;
+import com.necro.devolucionesback.dto.RechazoRequest;
 import com.necro.devolucionesback.dto.SolicitudRequestDTO;
 import com.necro.devolucionesback.dto.SolicitudResponseDTO;
 import com.necro.devolucionesback.model.Estado;
@@ -50,10 +50,33 @@ public class SolicitudController {
         return solicitudService.updateSolicitud(id, requestDTO);
     }
 
-    @PutMapping("/{id}/estado")
-    public SolicitudResponseDTO cambiarEstado(
-            @PathVariable Long id,
-            @Valid @RequestBody CambioEstadoRequest request) {
-        return solicitudService.cambiarEstadoSolicitud(id, request.getAccion(), request.getMotivoRechazo());
+    @PostMapping("/{id}/enviar")
+    public SolicitudResponseDTO enviar(@PathVariable Long id) {
+        return solicitudService.cambiarEstadoSolicitud(id, "enviar", null);
+    }
+
+    @PostMapping("/{id}/aprobar")
+    public SolicitudResponseDTO aprobar(@PathVariable Long id) {
+        return solicitudService.cambiarEstadoSolicitud(id, "aprobar", null);
+    }
+
+    @PostMapping("/{id}/rechazar")
+    public SolicitudResponseDTO rechazar(@PathVariable Long id, @Valid @RequestBody RechazoRequest request) {
+        return solicitudService.cambiarEstadoSolicitud(id, "rechazar", request.getMotivoRechazo());
+    }
+
+    @PostMapping("/{id}/pagar")
+    public SolicitudResponseDTO pagar(@PathVariable Long id) {
+        return solicitudService.cambiarEstadoSolicitud(id, "pagar", null);
+    }
+
+    @PostMapping("/{id}/anular")
+    public SolicitudResponseDTO anular(@PathVariable Long id) {
+        return solicitudService.cambiarEstadoSolicitud(id, "anular", null);
+    }
+
+    @PostMapping("/{id}/reabrir")
+    public SolicitudResponseDTO reabrir(@PathVariable Long id) {
+        return solicitudService.cambiarEstadoSolicitud(id, "reabrir", null);
     }
 }
