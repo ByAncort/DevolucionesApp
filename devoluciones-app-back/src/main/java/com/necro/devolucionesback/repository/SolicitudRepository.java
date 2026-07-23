@@ -14,4 +14,6 @@ public interface SolicitudRepository extends JpaRepository<Solicitud, Long>, Jpa
 
     @Query(value = "SELECT nextval('folio_seq')", nativeQuery = true)
     long nextFolio();
+
+    boolean existsByReferenciaBanco(String referenciaBanco);
 }

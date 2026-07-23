@@ -22,3 +22,6 @@ auth:
     jwtExpirationMs: ${JWT_EXPIRATION_MS}
     jwtSecret: ${JWT_SECRET}
     jwtRefresh: ${JWT_REFRESH}
+
+carga:
+  max-filas: ${CARGA_MAX_FILAS:50000}

@@ -1,11 +1,11 @@
 package com.necro.devolucionesback.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
 @Entity
 @Table(name = "bancos")
 public class Banco {

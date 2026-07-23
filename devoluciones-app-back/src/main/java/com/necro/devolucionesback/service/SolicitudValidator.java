@@ -11,6 +11,10 @@ public class SolicitudValidator {
         }
     }
 
+    public static boolean validarRutChilenoPublico(String rut) {
+        return validarRutChileno(rut);
+    }
+
     private static boolean validarRutChileno(String rut) {
         if (rut == null) return false;
         String limpio = rut.replace(".", "").replace("-", "").trim();

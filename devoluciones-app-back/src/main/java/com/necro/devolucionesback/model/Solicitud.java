@@ -47,6 +47,9 @@ public class Solicitud {
     @Column(name = "motivo_rechazo")
     private String motivoRechazo;
 
+    @Column(name = "referencia_banco", unique = true)
+    private String referenciaBanco;
+
     @Builder.Default
     @Column(name = "veces_reabierta", nullable = false)
     private int vecesReabierta = 0;

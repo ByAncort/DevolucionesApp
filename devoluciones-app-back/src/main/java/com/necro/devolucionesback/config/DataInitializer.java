@@ -1,7 +1,9 @@
 package com.necro.devolucionesback.config;
 
+import com.necro.devolucionesback.model.Banco;
 import com.necro.devolucionesback.model.Role;
 import com.necro.devolucionesback.model.User;
+import com.necro.devolucionesback.repository.BancoRepository;
 import com.necro.devolucionesback.repository.RoleRepository;
 import com.necro.devolucionesback.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -19,10 +22,31 @@ public class DataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
+    private final BancoRepository bancoRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
+        seedBancos();
+        seedAdminUser();
+    }
+
+    private void seedBancos() {
+        List<String> bancos = List.of(
+                "BANCO CHILE", "BANCO SANTANDER", "BANCO STATE",
+                "BANCO ITAÚ", "BANCO BCI", "BANCO SCOTIABANK",
+                "BANCO RIPLEY", "BANCO FALABELLA", "BANCO CONSORCIO",
+                "BANCO SECURITY", "BANCO COPEUCH", "BANCO DESCONTAR"
+        );
+        for (String nombre : bancos) {
+            if (bancoRepository.findByNombreBancoIgnoreCase(nombre).isEmpty()) {
+                bancoRepository.save(Banco.builder().nombre_banco(nombre).build());
+                log.info("Created banco: {}", nombre);
+            }
+        }
+    }
+
+    private void seedAdminUser() {
         Role supervisorRole = roleRepository.findByName("SUPERVISOR")
                 .orElseThrow(() -> new RuntimeException("SUPERVISOR role not found"));
 
