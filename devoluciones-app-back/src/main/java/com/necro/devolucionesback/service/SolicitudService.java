@@ -125,38 +125,133 @@ public class SolicitudService {
         return SolicitudResponseDTO.fromEntity(solicitud);
     }
 
-    public SolicitudResponseDTO cambiarEstadoSolicitud(Long id, String accion) {
+    @Transactional
+    public SolicitudResponseDTO cambiarEstadoSolicitud(Long id, String accion, String motivoRechazo) {
         Solicitud solicitud = solicitudRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
-                        org.springframework.http.HttpStatus.NOT_FOUND,
+                        HttpStatus.NOT_FOUND,
                         "Solicitud no encontrada con id: " + id));
-        // anular factura
+
+        User currentUser = customUserDetailsService.getCurrentUser();
+        Estado estadoActual = solicitud.getEstado();
+        String comentario;
+
         switch (accion.toLowerCase()) {
             case "enviar":
-                if (solicitud.getEstado().equals(Estado.BORRADOR)) {
-                    solicitud.setEstado(Estado.EN_REVISION);
-                } else {
-                    throw new InvalidStateTransitionException("Solicitud estado invalido "+solicitud.getEstado());
-                }
-                break;
-            case "aprobar":
-                if (solicitud.getEstado().equals(Estado.EN_REVISION)) {
-                    solicitud.setEstado(Estado.APROBADA);
-                } else {
-                    throw new InvalidStateTransitionException("Solicitud estado invalido "+solicitud.getEstado());
-                }
-                break;
-            case "rechazar":
-                if (solicitud.getEstado().equals(Estado.EN_REVISION)) {
-                    solicitud.setEstado(Estado.RECHAZADA);
-                } else {
-                    throw new InvalidStateTransitionException("Solicitud estado invalido "+solicitud.getEstado());
-                }
+                // R1: BORRADOR → EN_REVISION
+                // R2: basta ANALISTA
+                requireEstado(solicitud, Estado.BORRADOR, "enviar");
+                comentario = "Solicitud enviada a revisión";
+                solicitud.setEstado(Estado.EN_REVISION);
                 break;
 
+            case "aprobar":
+                // R1: EN_REVISION → APROBADA
+                // R2: requiere SUPERVISOR
+                // R7: supervisor no puede ser el creador
+                requireEstado(solicitud, Estado.EN_REVISION, "aprobar");
+                requireSupervisor(currentUser);
+                requireNoCreador(solicitud, currentUser);
+                comentario = "Solicitud aprobada por supervisor";
+                solicitud.setEstado(Estado.APROBADA);
+                break;
+
+            case "rechazar":
+                // R1: EN_REVISION → RECHAZADA
+                // R2: requiere SUPERVISOR
+                // R3: motivo_rechazo obligatorio
+                requireEstado(solicitud, Estado.EN_REVISION, "rechazar");
+                requireSupervisor(currentUser);
+                requireMotivoRechazo(motivoRechazo);
+                solicitud.setMotivoRechazo(motivoRechazo);
+                comentario = "Solicitud rechazada: " + motivoRechazo;
+                solicitud.setEstado(Estado.RECHAZADA);
+                break;
+
+            case "pagar":
+                // R1: APROBADA → PAGADA
+                // R2: requiere SUPERVISOR
+                requireEstado(solicitud, Estado.APROBADA, "pagar");
+                requireSupervisor(currentUser);
+                comentario = "Solicitud pagada";
+                solicitud.setEstado(Estado.PAGADA);
+                break;
+
+            case "anular":
+                // R1: BORRADOR → ANULADA
+                // R2: basta ANALISTA
+                requireEstado(solicitud, Estado.BORRADOR, "anular");
+                comentario = "Solicitud anulada";
+                solicitud.setEstado(Estado.ANULADA);
+                break;
+
+            case "reabrir":
+                // R1: RECHAZADA → BORRADOR
+                // R2: basta ANALISTA
+                // R4: una sola vez (vecesReabierta)
+                requireEstado(solicitud, Estado.RECHAZADA, "reabrir");
+                requireReabrirDisponible(solicitud);
+                solicitud.setVecesReabierta(solicitud.getVecesReabierta() + 1);
+                solicitud.setMotivoRechazo(null);
+                comentario = "Solicitud reabierta (intento " + solicitud.getVecesReabierta() + ")";
+                solicitud.setEstado(Estado.BORRADOR);
+                break;
+
+            default:
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Accion no valida: " + accion + ". Acciones disponibles: enviar, aprobar, rechazar, pagar, anular, reabrir");
         }
 
-        return null;
+        solicitud.setUpdatedBy(currentUser);
+        solicitudRepository.save(solicitud);
+        // R6: registrar evento en la misma transaccion
+        registerEvento(solicitud, currentUser, comentario);
+
+        return SolicitudResponseDTO.fromEntity(solicitud);
+    }
+
+    private void requireEstado(Solicitud solicitud, Estado esperado, String accion) {
+        if (!solicitud.getEstado().equals(esperado)) {
+            throw new InvalidStateTransitionException(
+                    "No se puede " + accion + ": estado actual es " + solicitud.getEstado().getLabel()
+                            + ", se requiere " + esperado.getLabel());
+        }
+    }
+
+    private void requireSupervisor(User user) {
+        boolean esSupervisor = user.getRoles().stream()
+                .anyMatch(role -> "SUPERVISOR".equals(role.getName()));
+        if (!esSupervisor) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Se requiere rol SUPERVISOR para esta accion");
+        }
+    }
+
+    private void requireNoCreador(Solicitud solicitud, User currentUser) {
+        if (solicitud.getCreatedBy() != null
+                && solicitud.getCreatedBy().getId() == currentUser.getId()) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "El supervisor que aprueba no puede ser el mismo usuario que creo la solicitud");
+        }
+    }
+
+    private void requireMotivoRechazo(String motivoRechazo) {
+        if (motivoRechazo == null || motivoRechazo.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "El motivo de rechazo es obligatorio (R3)");
+        }
+    }
+
+    private void requireReabrirDisponible(Solicitud solicitud) {
+        if (solicitud.getVecesReabierta() >= 1) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "La solicitud ya fue reabierta. No se puede reabrir mas de una vez (R4)");
+        }
     }
 
 }

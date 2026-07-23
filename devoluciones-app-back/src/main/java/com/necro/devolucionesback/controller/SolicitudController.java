@@ -1,5 +1,6 @@
 package com.necro.devolucionesback.controller;
 
+import com.necro.devolucionesback.dto.CambioEstadoRequest;
 import com.necro.devolucionesback.dto.SolicitudRequestDTO;
 import com.necro.devolucionesback.dto.SolicitudResponseDTO;
 import com.necro.devolucionesback.model.Estado;
@@ -43,38 +44,16 @@ public class SolicitudController {
     public SolicitudResponseDTO findById(@PathVariable Long id) {
         return solicitudService.findById(id);
     }
+
     @PutMapping("/{id}")
     public SolicitudResponseDTO updateSolicitud(@PathVariable Long id, @Valid @RequestBody SolicitudRequestDTO requestDTO) {
-        return solicitudService.updateSolicitud(id,requestDTO);
+        return solicitudService.updateSolicitud(id, requestDTO);
     }
 
-    // cambiar estados de la solicitud
-    @GetMapping("/{id}/enviar")
-    public SolicitudResponseDTO enviarSolicitud(@PathVariable Long id) {
-        return solicitudService.cambiarEstadoSolicitud(id,"enviar");
+    @PutMapping("/{id}/estado")
+    public SolicitudResponseDTO cambiarEstado(
+            @PathVariable Long id,
+            @Valid @RequestBody CambioEstadoRequest request) {
+        return solicitudService.cambiarEstadoSolicitud(id, request.getAccion(), request.getMotivoRechazo());
     }
-    @GetMapping("/{id}/aprobar")
-    public SolicitudResponseDTO aprobarSolicitud(@PathVariable Long id) {
-        return solicitudService.cambiarEstadoSolicitud(id,"aprobar");
-    }
-    @GetMapping("/{id}/rechazar")
-    public SolicitudResponseDTO rechazarSolicitud(@PathVariable Long id) {
-        return solicitudService.cambiarEstadoSolicitud(id,"rechazar");
-    }
-    @GetMapping("/{id}/pagar")
-    public SolicitudResponseDTO pagarSolicitud(@PathVariable Long id) {
-        return solicitudService.cambiarEstadoSolicitud(id,"pagar");
-    }
-    @GetMapping("/{id}/reabrir")
-    public SolicitudResponseDTO reabrirSolicitud(@PathVariable Long id) {
-        return solicitudService.cambiarEstadoSolicitud(id,"reabrir");
-    }
-    @GetMapping("/{id}/historial")
-    public SolicitudResponseDTO historialSolicitud(@PathVariable Long id) {
-        return solicitudService.cambiarEstadoSolicitud(id,"historial");
-    }
-
-
-
-
 }
