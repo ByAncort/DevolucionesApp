@@ -43,4 +43,38 @@ public class SolicitudController {
     public SolicitudResponseDTO findById(@PathVariable Long id) {
         return solicitudService.findById(id);
     }
+    @PutMapping("/{id}")
+    public SolicitudResponseDTO updateSolicitud(@PathVariable Long id, @Valid @RequestBody SolicitudRequestDTO requestDTO) {
+        return solicitudService.updateSolicitud(id,requestDTO);
+    }
+
+    // cambiar estados de la solicitud
+    @GetMapping("/{id}/enviar")
+    public SolicitudResponseDTO enviarSolicitud(@PathVariable Long id) {
+        return solicitudService.cambiarEstadoSolicitud(id,"enviar");
+    }
+    @GetMapping("/{id}/aprobar")
+    public SolicitudResponseDTO aprobarSolicitud(@PathVariable Long id) {
+        return solicitudService.cambiarEstadoSolicitud(id,"aprobar");
+    }
+    @GetMapping("/{id}/rechazar")
+    public SolicitudResponseDTO rechazarSolicitud(@PathVariable Long id) {
+        return solicitudService.cambiarEstadoSolicitud(id,"rechazar");
+    }
+    @GetMapping("/{id}/pagar")
+    public SolicitudResponseDTO pagarSolicitud(@PathVariable Long id) {
+        return solicitudService.cambiarEstadoSolicitud(id,"pagar");
+    }
+    @GetMapping("/{id}/reabrir")
+    public SolicitudResponseDTO reabrirSolicitud(@PathVariable Long id) {
+        return solicitudService.cambiarEstadoSolicitud(id,"reabrir");
+    }
+    @GetMapping("/{id}/historial")
+    public SolicitudResponseDTO historialSolicitud(@PathVariable Long id) {
+        return solicitudService.cambiarEstadoSolicitud(id,"historial");
+    }
+
+
+
+
 }
