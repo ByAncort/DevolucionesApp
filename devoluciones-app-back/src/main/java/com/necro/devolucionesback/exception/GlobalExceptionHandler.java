@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -39,6 +40,17 @@ public class GlobalExceptionHandler {
         log.error("InvalidStateTransitionException: {}", ex.getMessage());
         return buildResponse(HttpStatus.CONFLICT.value(), "Conflict",
                 ex.getMessage(), request.getServletPath());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex, HttpServletRequest request) {
+        log.error("DataIntegrityViolationException: {}", ex.getMessage());
+        String message = "Ya existe un registro con los mismos datos. Verifique la información e intente nuevamente.";
+        if (ex.getMessage() != null && ex.getMessage().contains("referencia_banco")) {
+            message = "Ya existe una solicitud con esa referencia bancaria.";
+        }
+        return buildResponse(HttpStatus.CONFLICT.value(), "Conflict",
+                message, request.getServletPath());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -53,9 +53,16 @@ public class SolicitudService {
                 .updatedBy(currentUser)
                 .bancoDestino(banco)
                 .cuentaDestino(request.cuentaDestino())
+                .referenciaBanco(request.referenciaBanco() != null ? request.referenciaBanco() : null)
 //                .origen() por el momento metodo creacion manual todas manual
                 .estado(Estado.BORRADOR)
                 .build();
+
+        if (request.referenciaBanco() != null && solicitudRepository.existsByReferenciaBanco(request.referenciaBanco())) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT,
+                    "Ya existe una solicitud con la referencia bancaria: " + request.referenciaBanco());
+        }
 
         solicitud = solicitudRepository.save(solicitud);
         registerEvento(solicitud, currentUser, null, "Solicitud creada en el sistema");

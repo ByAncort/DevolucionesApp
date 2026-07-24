@@ -17,6 +17,7 @@ public record SolicitudResponseDTO(
         String bancoDestinoNombre,
 
         String cuentaDestino,
+        String referenciaBanco,
         Estado estado,
         String motivoRechazo,
 
@@ -38,6 +39,7 @@ public record SolicitudResponseDTO(
             solicitud.getBancoDestino() != null ? solicitud.getBancoDestino().getNombreBanco() : null,
 
             solicitud.getCuentaDestino(),
+            solicitud.getReferenciaBanco(),
             solicitud.getEstado(),
             solicitud.getMotivoRechazo(),
 

@@ -21,5 +21,7 @@ public record SolicitudRequestDTO(
 
         @NotBlank(message = "La cuenta de destino es obligatoria")
         @Size(max = 30, message = "La cuenta de destino es demasiado larga")
-        String cuentaDestino
+        String cuentaDestino,
+
+        String referenciaBanco
 ) {}

@@ -101,7 +101,7 @@ class SolicitudServiceTest {
         @DisplayName("Crear solicitud valida -> retorna DTO con folio y estado BORRADOR")
         void crearSolicitud_validRequest_returnsDtoWithFolioAndBorrador() {
             SolicitudRequestDTO request = new SolicitudRequestDTO(
-                    "12345678-5", "MARIA PEREZ", 150000.0, 1L, "001234567890");
+                    "12345678-5", "MARIA PEREZ", 150000.0, 1L, "001234567890", null);
 
             given(bancoRepository.findById(1L)).willReturn(Optional.of(banco));
             given(customUserDetailsService.getCurrentUser()).willReturn(analistaUser);
@@ -120,7 +120,7 @@ class SolicitudServiceTest {
         @DisplayName("R6 - Crear solicitud registra EventoSolicitud en misma transaccion")
         void crearSolicitud_registersEvent() {
             SolicitudRequestDTO request = new SolicitudRequestDTO(
-                    "12345678-5", "MARIA PEREZ", 150000.0, 1L, "001234567890");
+                    "12345678-5", "MARIA PEREZ", 150000.0, 1L, "001234567890", null);
 
             given(bancoRepository.findById(1L)).willReturn(Optional.of(banco));
             given(customUserDetailsService.getCurrentUser()).willReturn(analistaUser);
@@ -141,7 +141,7 @@ class SolicitudServiceTest {
         @DisplayName("Banco inexistente -> lanza IllegalArgumentException")
         void crearSolicitud_bancoNotFound_throwsException() {
             SolicitudRequestDTO request = new SolicitudRequestDTO(
-                    "12345678-5", "MARIA PEREZ", 150000.0, 99L, "001234567890");
+                    "12345678-5", "MARIA PEREZ", 150000.0, 99L, "001234567890", null);
 
             given(bancoRepository.findById(99L)).willReturn(Optional.empty());
 
@@ -513,7 +513,7 @@ class SolicitudServiceTest {
         @DisplayName("Actualizar solicitud en BORRADOR -> exito")
         void updateSolicitud_borrador_returnsUpdated() {
             SolicitudRequestDTO requestDTO = new SolicitudRequestDTO(
-                    "87654321-0", "NUEVO NOMBRE", 200000.0, 1L, "999999999");
+                    "87654321-0", "NUEVO NOMBRE", 200000.0, 1L, "999999999", null);
             given(solicitudRepository.findById(1L)).willReturn(Optional.of(solicitud));
             given(bancoRepository.findById(1L)).willReturn(Optional.of(banco));
             given(customUserDetailsService.getCurrentUser()).willReturn(analistaUser);
@@ -530,7 +530,7 @@ class SolicitudServiceTest {
         void updateSolicitud_noBorrador_throwsInvalidState() {
             solicitud.setEstado(Estado.EN_REVISION);
             SolicitudRequestDTO requestDTO = new SolicitudRequestDTO(
-                    "87654321-0", "NUEVO NOMBRE", 200000.0, 1L, "999999999");
+                    "87654321-0", "NUEVO NOMBRE", 200000.0, 1L, "999999999", null);
             given(solicitudRepository.findById(1L)).willReturn(Optional.of(solicitud));
 
             assertThatThrownBy(() -> solicitudService.updateSolicitud(1L, requestDTO))
@@ -542,7 +542,7 @@ class SolicitudServiceTest {
         @DisplayName("Actualizar solicitud inexistente -> 404")
         void updateSolicitud_notFound_throwsNotFound() {
             SolicitudRequestDTO requestDTO = new SolicitudRequestDTO(
-                    "87654321-0", "NUEVO NOMBRE", 200000.0, 1L, "999999999");
+                    "87654321-0", "NUEVO NOMBRE", 200000.0, 1L, "999999999", null);
             given(solicitudRepository.findById(99L)).willReturn(Optional.empty());
 
             assertThatThrownBy(() -> solicitudService.updateSolicitud(99L, requestDTO))

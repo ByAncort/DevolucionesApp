@@ -72,7 +72,7 @@ class SolicitudControllerTest {
     private SolicitudResponseDTO buildResponse(Long id, Estado estado) {
         return new SolicitudResponseDTO(
                 id, "DEV-2026-000001", "12345678-5", "MARIA PEREZ",
-                150000.0, 1L, "BANCO CHILE", "001234567890",
+                150000.0, 1L, "BANCO CHILE", "001234567890", null,
                 estado, null, "analista1", "analista1",
                 LocalDateTime.now(), LocalDateTime.now());
     }
@@ -82,7 +82,7 @@ class SolicitudControllerTest {
     @WithMockUser
     void create_validRequest_returns201() throws Exception {
         SolicitudRequestDTO request = new SolicitudRequestDTO(
-                "12345678-5", "MARIA PEREZ", 150000.0, 1L, "001234567890");
+                "12345678-5", "MARIA PEREZ", 150000.0, 1L, "001234567890", null);
         SolicitudResponseDTO response = buildResponse(1L, Estado.BORRADOR);
 
         given(solicitudService.CrearSolicitud(any(SolicitudRequestDTO.class))).willReturn(response);
@@ -113,7 +113,7 @@ class SolicitudControllerTest {
     @DisplayName("POST /api/v1/solicitudes sin autenticacion -> 401/403")
     void create_noAuth_returns401or403() throws Exception {
         SolicitudRequestDTO request = new SolicitudRequestDTO(
-                "12345678-5", "MARIA PEREZ", 150000.0, 1L, "001234567890");
+                "12345678-5", "MARIA PEREZ", 150000.0, 1L, "001234567890", null);
 
         mockMvc.perform(post("/api/v1/solicitudes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -188,7 +188,7 @@ class SolicitudControllerTest {
     @WithMockUser
     void updateSolicitud_validRequest_returns200() throws Exception {
         SolicitudRequestDTO request = new SolicitudRequestDTO(
-                "12345678-5", "MARIA PEREZ ACTUALIZADA", 200000.0, 1L, "001234567890");
+                "12345678-5", "MARIA PEREZ ACTUALIZADA", 200000.0, 1L, "001234567890", null);
         SolicitudResponseDTO response = buildResponse(1L, Estado.BORRADOR);
         given(solicitudService.updateSolicitud(eq(1L), any(SolicitudRequestDTO.class))).willReturn(response);
 
@@ -204,7 +204,7 @@ class SolicitudControllerTest {
     @WithMockUser
     void updateSolicitud_noBorrador_returns409() throws Exception {
         SolicitudRequestDTO request = new SolicitudRequestDTO(
-                "12345678-5", "MARIA PEREZ", 200000.0, 1L, "001234567890");
+                "12345678-5", "MARIA PEREZ", 200000.0, 1L, "001234567890", null);
         given(solicitudService.updateSolicitud(eq(1L), any(SolicitudRequestDTO.class)))
                 .willThrow(new InvalidStateTransitionException(
                         "No se puede actualizar: solo editable en BORRADOR"));
