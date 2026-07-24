@@ -6,6 +6,8 @@ import {
   PageResponse,
   SolicitudResponse,
   SolicitudFilters,
+  EventoHistorial,
+  AccionesDisponibles,
 } from './solicitudes.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -25,5 +27,22 @@ export class SolicitudesService {
     if (filters.fechaFin) params = params.set('fechaFin', filters.fechaFin);
 
     return this.http.get<PageResponse<SolicitudResponse>>(this.baseUrl, { params });
+  }
+
+  getById(id: number): Observable<SolicitudResponse> {
+    return this.http.get<SolicitudResponse>(`${this.baseUrl}/${id}`);
+  }
+
+  getHistorial(id: number): Observable<EventoHistorial[]> {
+    return this.http.get<EventoHistorial[]>(`${this.baseUrl}/${id}/historial`);
+  }
+
+  getAcciones(id: number): Observable<AccionesDisponibles> {
+    return this.http.get<AccionesDisponibles>(`${this.baseUrl}/${id}/acciones`);
+  }
+
+  accion(id: number, accion: string, motivoRechazo?: string): Observable<SolicitudResponse> {
+    const body = motivoRechazo ? { motivoRechazo } : undefined;
+    return this.http.post<SolicitudResponse>(`${this.baseUrl}/${id}/${accion}`, body);
   }
 }
