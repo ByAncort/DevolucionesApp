@@ -72,7 +72,7 @@ public class DataInitializer implements CommandLineRunner {
         if (!userRepository.existsByUsername("analista1")) {
             User analista = User.builder()
                     .username("analista1")
-                    .email("analista1@devoluciones.local")
+                    .email("analista@test.cl")
                     .password(passwordEncoder.encode("123456"))
                     .roles(Set.of(analistaRole))
                     .build();
@@ -83,7 +83,7 @@ public class DataInitializer implements CommandLineRunner {
         if (!userRepository.existsByUsername("supervisor1")) {
             User supervisor = User.builder()
                     .username("supervisor1")
-                    .email("supervisor1@devoluciones.local")
+                    .email("supervisor@test.cl")
                     .password(passwordEncoder.encode("123456"))
                     .roles(Set.of(supervisorRole))
                     .build();
