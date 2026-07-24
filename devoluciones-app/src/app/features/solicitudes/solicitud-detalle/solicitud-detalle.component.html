@@ -1,0 +1,271 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a routerLink="/solicitudes" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+        <h1 class="text-lg font-semibold text-gray-900">
+          @if (solicitud()) {
+            {{ solicitud()!.folio }}
+          } @else {
+            Detalle de Solicitud
+          }
+        </h1>
+        @if (solicitud()) {
+          <span
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+            [ngClass]="[colorEstado(solicitud()!.estado).bg, colorEstado(solicitud()!.estado).text]"
+          >
+            {{ labelEstado(solicitud()!.estado) }}
+          </span>
+        }
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-sm text-gray-500">{{ authService.getUserEmail() }}</span>
+        <button (click)="authService.logout()" class="text-sm text-red-600 hover:text-red-800 font-medium">
+          Cerrar sesion
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-6">
+    @if (loading()) {
+      <div class="flex items-center justify-center py-20">
+        <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+      </div>
+    } @else if (error()) {
+      <div class="text-center py-20">
+        <p class="text-red-500 text-sm mb-4">{{ error() }}</p>
+        <a routerLink="/solicitudes" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+          Volver a la bandeja
+        </a>
+      </div>
+    } @else if (solicitud()) {
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Datos de la solicitud -->
+        <div class="lg:col-span-2 space-y-6">
+          <div class="bg-white rounded-xl shadow-sm border p-6">
+            <h2 class="text-sm font-semibold text-gray-900 mb-4">Datos de la Solicitud</h2>
+            <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+              <div>
+                <dt class="text-gray-500">Folio</dt>
+                <dd class="font-mono text-gray-900 mt-0.5">{{ solicitud()!.folio }}</dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">Estado</dt>
+                <dd class="mt-0.5">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    [ngClass]="[colorEstado(solicitud()!.estado).bg, colorEstado(solicitud()!.estado).text]"
+                  >
+                    {{ labelEstado(solicitud()!.estado) }}
+                  </span>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">RUT Cliente</dt>
+                <dd class="text-gray-900 font-medium mt-0.5">{{ solicitud()!.rutCliente }}</dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">Nombre Cliente</dt>
+                <dd class="text-gray-900 font-medium mt-0.5">{{ solicitud()!.nombreCliente }}</dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">Monto</dt>
+                <dd class="text-gray-900 font-semibold mt-0.5">{{ formatoMonto(solicitud()!.monto) }}</dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">Banco Destino</dt>
+                <dd class="text-gray-900 mt-0.5">{{ solicitud()!.bancoDestinoNombre }}</dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">Cuenta Destino</dt>
+                <dd class="font-mono text-gray-900 mt-0.5">{{ solicitud()!.cuentaDestino }}</dd>
+              </div>
+              @if (solicitud()!.motivoRechazo) {
+                <div class="col-span-2">
+                  <dt class="text-gray-500">Motivo Rechazo</dt>
+                  <dd class="text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 mt-1 text-sm">
+                    {{ solicitud()!.motivoRechazo }}
+                  </dd>
+                </div>
+              }
+              <div>
+                <dt class="text-gray-500">Creado por</dt>
+                <dd class="text-gray-900 mt-0.5">{{ solicitud()!.creadoPorNombre }}</dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">Ultimo update por</dt>
+                <dd class="text-gray-900 mt-0.5">{{ solicitud()!.actualizadoPorNombre }}</dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">Fecha Creacion</dt>
+                <dd class="text-gray-900 mt-0.5">{{ formatoFecha(solicitud()!.fechaCreacion) }}</dd>
+              </div>
+              <div>
+                <dt class="text-gray-500">Ultima Actualizacion</dt>
+                <dd class="text-gray-900 mt-0.5">{{ formatoFecha(solicitud()!.fechaActualizacion) }}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- Historial de eventos -->
+          <div class="bg-white rounded-xl shadow-sm border p-6">
+            <h2 class="text-sm font-semibold text-gray-900 mb-4">Historial de Eventos</h2>
+            @if (historial().length === 0) {
+              <p class="text-gray-400 text-sm">Sin eventos registrados.</p>
+            } @else {
+              <div class="space-y-0">
+                @for (evt of historial(); track evt.id; let last = $last) {
+                  <div class="flex gap-3" [class.pb-4]="!last">
+                    <!-- Linea vertical -->
+                    <div class="flex flex-col items-center">
+                      <div class="w-2.5 h-2.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></div>
+                      @if (!last) {
+                        <div class="w-px flex-1 bg-gray-200"></div>
+                      }
+                    </div>
+                    <!-- Contenido -->
+                    <div class="pb-2 flex-1 min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        @if (evt.estadoOrigen) {
+                          <span
+                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium"
+                            [ngClass]="[colorEstado(evt.estadoOrigen).bg, colorEstado(evt.estadoOrigen).text]"
+                          >
+                            {{ labelEstado(evt.estadoOrigen) }}
+                          </span>
+                          <svg class="w-3 h-3 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                          </svg>
+                        }
+                        <span
+                          class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium"
+                          [ngClass]="[colorEstado(evt.estadoDestino).bg, colorEstado(evt.estadoDestino).text]"
+                        >
+                          {{ labelEstado(evt.estadoDestino) }}
+                        </span>
+                      </div>
+                      <p class="text-xs text-gray-500 mt-1">
+                        {{ evt.usuario }} &middot; {{ formatoFecha(evt.fecha) }}
+                      </p>
+                      @if (evt.comentario) {
+                        <p class="text-xs text-gray-600 mt-1 italic">{{ evt.comentario }}</p>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Sidebar: Acciones -->
+        <div class="space-y-6">
+          @if (accionesDisponibles().length > 0) {
+            <div class="bg-white rounded-xl shadow-sm border p-6">
+              <h2 class="text-sm font-semibold text-gray-900 mb-4">Acciones</h2>
+              <div class="space-y-2">
+                @for (accion of accionesDisponibles(); track accion) {
+                  <button
+                    (click)="ejecutarAccion(accion)"
+                    [disabled]="accionesLoading()"
+                    class="w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors
+                           disabled:opacity-50 disabled:cursor-not-allowed"
+                    [ngClass]="colorAccion(accion)"
+                  >
+                    @if (accionesLoading()) {
+                      <span class="inline-flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Procesando...
+                      </span>
+                    } @else {
+                      {{ labelAccion(accion) }}
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="bg-white rounded-xl shadow-sm border p-6">
+              <h2 class="text-sm font-semibold text-gray-900 mb-2">Acciones</h2>
+              <p class="text-gray-400 text-sm">
+                @if (solicitud()!.estado === 'PAGADA') {
+                  Solicitud pagada. Sin acciones disponibles.
+                } @else if (solicitud()!.estado === 'ANULADA') {
+                  Solicitud anulada. Sin acciones disponibles.
+                } @else {
+                  No tiene permisos para realizar acciones en este estado.
+                }
+              </p>
+            </div>
+          }
+
+          <!-- Resumen rapido -->
+          <div class="bg-white rounded-xl shadow-sm border p-6">
+            <h2 class="text-sm font-semibold text-gray-900 mb-3">Resumen</h2>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-gray-500">Monto</span>
+                <span class="font-semibold text-gray-900">{{ formatoMonto(solicitud()!.monto) }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">Estado</span>
+                <span class="font-medium text-gray-900">{{ labelEstado(solicitud()!.estado) }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">Eventos</span>
+                <span class="text-gray-900">{{ historial().length }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </main>
+</div>
+
+<!-- Modal de rechazo -->
+@if (mostrarRechazoModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+      <h3 class="text-base font-semibold text-gray-900 mb-2">Rechazar Solicitud</h3>
+      <p class="text-sm text-gray-500 mb-4">Ingrese el motivo del rechazo. Este campo es obligatorio.</p>
+      <textarea
+        [(ngModel)]="motivoRechazo"
+        rows="3"
+        placeholder="Motivo del rechazo..."
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none
+               focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+      ></textarea>
+      <div class="flex justify-end gap-2 mt-4">
+        <button
+          (click)="cancelarRechazo()"
+          class="px-4 py-2 border border-gray-300 text-gray-600 hover:bg-gray-50
+                 text-sm font-medium rounded-lg transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          (click)="confirmarAccion('rechazar')"
+          [disabled]="!motivoRechazo().trim() || accionesLoading()"
+          class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-300
+                 text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          Rechazar
+        </button>
+      </div>
+    </div>
+  </div>
+}

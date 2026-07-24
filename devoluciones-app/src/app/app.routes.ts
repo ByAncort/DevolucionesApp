@@ -8,6 +8,12 @@ export const routes: Routes = [
       import('./features/auth/login/login.component').then(m => m.LoginComponent),
   },
   {
+    path: 'solicitudes/:id',
+    loadComponent: () =>
+      import('./features/solicitudes/solicitud-detalle/solicitud-detalle.component').then(m => m.SolicitudDetalleComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: 'solicitudes',
     loadComponent: () =>
       import('./features/solicitudes/solicitudes.component').then(m => m.SolicitudesComponent),

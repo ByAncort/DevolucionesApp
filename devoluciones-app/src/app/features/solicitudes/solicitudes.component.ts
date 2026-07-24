@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/services/auth.service';
 import { SolicitudesService } from './solicitudes.service';
 import {
@@ -20,6 +21,7 @@ import {
 })
 export class SolicitudesComponent implements OnInit {
   private readonly solicitudesService = inject(SolicitudesService);
+  private readonly router = inject(Router);
   readonly authService = inject(AuthService);
 
   solicitudes = signal<SolicitudResponse[]>([]);
@@ -135,5 +137,9 @@ export class SolicitudesComponent implements OnInit {
 
   trackById(_index: number, item: SolicitudResponse): number {
     return item.id;
+  }
+
+  verDetalle(id: number): void {
+    this.router.navigate(['/solicitudes', id]);
   }
 }
