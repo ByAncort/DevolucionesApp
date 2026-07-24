@@ -1,0 +1,7 @@
+target/
+.git/
+.idea/
+*.iml
+.env
+graphify-out/
+node_modules/

@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: devoluciones
+      POSTGRES_USER: devoluciones
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-cambiar-por-password-seguro}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devoluciones"]
+      interval: 5s
+      retries: 10
+
+  backend:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/devoluciones
+      DB_USER: devoluciones
+      DB_PASSWORD: ${DB_PASSWORD:-cambiar-por-password-seguro}
+      JWT_SECRET: ${JWT_SECRET:-cambiar-por-secreto-de-al-menos-256-bits}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-3600000}
+      JWT_REFRESH: ${JWT_REFRESH:-2592000000}
+      CARGA_DIR: ./cargas
+      CARGA_MAX_FILAS: ${CARGA_MAX_FILAS:-50000}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
