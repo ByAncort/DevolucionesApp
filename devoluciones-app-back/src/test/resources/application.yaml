@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=POSTGRESQL
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+auth:
+  app:
+    jwtCookieName: auth
+    jwtExpirationMs: 3600000
+    jwtSecret: dGVzdC1zZWNyZXQta2V5LWZvci11bml0LXRlc3RzLWF0LWxlYXN0LTI1Ni1iaXRz
+    jwtRefresh: test-refresh-secret
+
+carga:
+  max-filas: 50000
+
+app:
+  cors:
+    allowed-origins: "*"

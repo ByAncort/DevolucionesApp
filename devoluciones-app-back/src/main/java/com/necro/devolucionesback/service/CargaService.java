@@ -103,7 +103,7 @@ public class CargaService {
 
                 String rut = safeTrim(campos[0]);
                 String nombre = safeTrim(campos[1]);
-                Double monto = Double.parseDouble(safeTrim(campos[2]).replace(",", "."));
+                Double monto = Double.parseDouble(safeTrim(campos[2]).replace(".", "").replace(",", "."));
                 String nombreBanco = safeTrim(campos[3]);
                 String cuenta = safeTrim(campos[4]);
                 String referenciaBanco = safeTrim(campos[5]);

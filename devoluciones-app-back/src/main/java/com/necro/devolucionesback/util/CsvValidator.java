@@ -40,7 +40,7 @@ public class CsvValidator {
             errores.add(new CsvError("monto", "El monto es obligatorio"));
         } else {
             try {
-                Double monto = Double.parseDouble(montoStr.replace(",", "."));
+                Double monto = Double.parseDouble(montoStr.replace(".", "").replace(",", "."));
                 if (monto <= 0 || monto > 10_000_000) {
                     errores.add(new CsvError("monto", "El monto debe ser mayor a 0 y no superar 10.000.000 CLP"));
                 }
