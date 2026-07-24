@@ -1,0 +1,194 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <h1 class="text-lg font-semibold text-gray-900">Bandeja de Solicitudes</h1>
+      <div class="flex items-center gap-4">
+        <span class="text-sm text-gray-500">{{ authService.getUserEmail() }}</span>
+        <button
+          (click)="authService.logout()"
+          class="text-sm text-red-600 hover:text-red-800 font-medium"
+        >
+          Cerrar sesion
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <!-- Filtros -->
+    <div class="bg-white rounded-xl shadow-sm border p-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+        <!-- Estado -->
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1">Estado</label>
+          <select
+            [(ngModel)]="filtroEstado"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">Todos</option>
+            @for (e of estados; track e) {
+              <option [value]="e">{{ labelEstado(e) }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- RUT -->
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1">RUT Cliente</label>
+          <input
+            type="text"
+            [(ngModel)]="filtroRut"
+            placeholder="12345678-9"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Fecha Inicio -->
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1">Fecha Inicio</label>
+          <input
+            type="date"
+            [(ngModel)]="filtroFechaInicio"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Fecha Fin -->
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1">Fecha Fin</label>
+          <input
+            type="date"
+            [(ngModel)]="filtroFechaFin"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Botones -->
+        <div class="flex gap-2">
+          <button
+            (click)="aplicarFiltros()"
+            class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm
+                   font-medium rounded-lg transition-colors"
+          >
+            Buscar
+          </button>
+          <button
+            (click)="limpiarFiltros()"
+            class="px-4 py-2 border border-gray-300 text-gray-600 hover:bg-gray-50
+                   text-sm font-medium rounded-lg transition-colors"
+          >
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+      @if (loading()) {
+        <div class="flex items-center justify-center py-16">
+          <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+        </div>
+      } @else if (solicitudes().length === 0) {
+        <div class="text-center py-16 text-gray-400 text-sm">
+          No se encontraron solicitudes.
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b text-left">
+              <tr>
+                <th class="px-4 py-3 font-medium text-gray-500">Folio</th>
+                <th class="px-4 py-3 font-medium text-gray-500">RUT</th>
+                <th class="px-4 py-3 font-medium text-gray-500">Cliente</th>
+                <th class="px-4 py-3 font-medium text-gray-500 text-right">Monto</th>
+                <th class="px-4 py-3 font-medium text-gray-500">Banco</th>
+                <th class="px-4 py-3 font-medium text-gray-500">Estado</th>
+                <th class="px-4 py-3 font-medium text-gray-500">Creado por</th>
+                <th class="px-4 py-3 font-medium text-gray-500">Fecha</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (s of solicitudes(); track s.id) {
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-4 py-3 font-mono text-xs text-gray-900">{{ s.folio }}</td>
+                  <td class="px-4 py-3 text-gray-700">{{ s.rutCliente }}</td>
+                  <td class="px-4 py-3 text-gray-900 font-medium">{{ s.nombreCliente }}</td>
+                  <td class="px-4 py-3 text-right text-gray-900">{{ formatoMonto(s.monto) }}</td>
+                  <td class="px-4 py-3 text-gray-600">{{ s.bancoDestinoNombre }}</td>
+                  <td class="px-4 py-3">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                      [ngClass]="[colorEstado(s.estado).bg, colorEstado(s.estado).text]"
+                    >
+                      {{ labelEstado(s.estado) }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-gray-600">{{ s.creadoPorNombre }}</td>
+                  <td class="px-4 py-3 text-gray-500">{{ formatoFecha(s.fechaCreacion) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginacion -->
+        <div class="border-t px-4 py-3 flex items-center justify-between text-sm text-gray-500">
+          <span>
+            Mostrando {{ currentPage() * pageSize() + 1 }}-{{ mathMin((currentPage() + 1) * pageSize(), totalElements()) }}
+            de {{ totalElements() }} solicitudes
+          </span>
+          <div class="flex items-center gap-1">
+            <button
+              (click)="pagina(0)"
+              [disabled]="currentPage() === 0"
+              class="px-2 py-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              &laquo;
+            </button>
+            <button
+              (click)="pagina(currentPage() - 1)"
+              [disabled]="currentPage() === 0"
+              class="px-2 py-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              &lsaquo;
+            </button>
+            @for (p of paginas(); track p) {
+              <button
+                (click)="pagina(p)"
+                class="px-3 py-1 rounded text-xs font-medium transition-colors"
+                [ngClass]="p === currentPage()
+                  ? 'bg-blue-600 text-white'
+                  : 'hover:bg-gray-100 text-gray-600'"
+              >
+                {{ p + 1 }}
+              </button>
+            }
+            <button
+              (click)="pagina(currentPage() + 1)"
+              [disabled]="currentPage() >= totalPages() - 1"
+              class="px-2 py-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              &rsaquo;
+            </button>
+            <button
+              (click)="pagina(totalPages() - 1)"
+              [disabled]="currentPage() >= totalPages() - 1"
+              class="px-2 py-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              &raquo;
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </main>
+</div>
