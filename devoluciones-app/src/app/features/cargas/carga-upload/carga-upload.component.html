@@ -1,0 +1,111 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <h1 class="text-lg font-semibold text-gray-900">Carga Masiva</h1>
+        <nav class="flex items-center gap-1 text-sm">
+          <a routerLink="/solicitudes" class="px-3 py-1.5 rounded-lg font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100">Solicitudes</a>
+          <a routerLink="/cargas" class="px-3 py-1.5 rounded-lg font-medium text-blue-600 bg-blue-50">Carga Masiva</a>
+        </nav>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-sm text-gray-500">{{ authService.getUserEmail() }}</span>
+        <button (click)="authService.logout()" class="text-sm text-red-600 hover:text-red-800 font-medium">
+          Cerrar sesion
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-xl shadow-sm border p-8">
+      <!-- Drop zone -->
+      <div
+        class="border-2 border-dashed rounded-xl p-12 text-center transition-colors cursor-pointer"
+        [class.border-blue-400]="arrastrando()"
+        [class.bg-blue-50]="arrastrando()"
+        [class.border-gray-300]="!arrastrando()"
+        [class.hover:border-gray-400]="!arrastrando()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        (click)="abrirSelector()"
+      >
+        <input
+          #fileInput
+          type="file"
+          accept=".csv"
+          class="hidden"
+          (change)="onFileSelect($event)"
+        />
+
+        @if (!archivo()) {
+          <div class="space-y-3">
+            <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+            <p class="text-sm text-gray-600">
+              Arrastre un archivo CSV aqui o <span class="text-blue-600 font-medium">haga clic para seleccionar</span>
+            </p>
+            <p class="text-xs text-gray-400">Formato: CSV separado por punto y coma (;)</p>
+          </div>
+        } @else {
+          <div class="space-y-3">
+            <svg class="mx-auto h-10 w-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <p class="text-sm font-medium text-gray-900">{{ archivo()!.name }}</p>
+            <p class="text-xs text-gray-500">{{ formatoTamano(archivo()!.size) }}</p>
+            <button
+              (click)="limpiar(); $event.stopPropagation()"
+              class="text-xs text-red-500 hover:text-red-700 font-medium"
+            >
+              Eliminar
+            </button>
+          </div>
+        }
+      </div>
+
+      @if (error()) {
+        <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          {{ error() }}
+        </div>
+      }
+
+      <!-- Boton subir -->
+      <div class="mt-6 flex justify-end">
+        <button
+          (click)="subir()"
+          [disabled]="!archivo() || subiendo()"
+          class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300
+                 text-white text-sm font-medium rounded-lg transition-colors
+                 flex items-center gap-2"
+        >
+          @if (subiendo()) {
+            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            Subiendo...
+          } @else {
+            Subir archivo
+          }
+        </button>
+      </div>
+
+      <!-- Formato esperado -->
+      <div class="mt-8 border-t pt-6">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Formato esperado del CSV</h3>
+        <p class="text-xs text-gray-500 mb-3">Separado por punto y coma (;). La primera linea es el header.</p>
+        <div class="bg-gray-50 rounded-lg p-4 font-mono text-xs text-gray-600 overflow-x-auto">
+          <div class="text-gray-400 mb-1">RUT;Nombre;Monto;Banco;Cuenta;Referencia</div>
+          <div>12345678-5;Juan Perez;150000;Banco Estado;12345678;REF-001</div>
+          <div>87654321-K;Maria Lopez;250000;Banco Chile;87654321;REF-002</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
