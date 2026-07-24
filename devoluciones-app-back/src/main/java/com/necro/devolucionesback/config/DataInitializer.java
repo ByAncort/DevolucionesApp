@@ -29,6 +29,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         seedBancos();
         seedAdminUser();
+        seedTestUsers();
     }
 
     private void seedBancos() {
@@ -59,6 +60,35 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             userRepository.save(admin);
             log.info("Default admin user created (admin / admin123)");
+        }
+    }
+
+    private void seedTestUsers() {
+        Role analistaRole = roleRepository.findByName("ANALISTA")
+                .orElseThrow(() -> new RuntimeException("ANALISTA role not found"));
+        Role supervisorRole = roleRepository.findByName("SUPERVISOR")
+                .orElseThrow(() -> new RuntimeException("SUPERVISOR role not found"));
+
+        if (!userRepository.existsByUsername("analista1")) {
+            User analista = User.builder()
+                    .username("analista1")
+                    .email("analista1@devoluciones.local")
+                    .password(passwordEncoder.encode("123456"))
+                    .roles(Set.of(analistaRole))
+                    .build();
+            userRepository.save(analista);
+            log.info("Test user created (analista1 / 123456)");
+        }
+
+        if (!userRepository.existsByUsername("supervisor1")) {
+            User supervisor = User.builder()
+                    .username("supervisor1")
+                    .email("supervisor1@devoluciones.local")
+                    .password(passwordEncoder.encode("123456"))
+                    .roles(Set.of(supervisorRole))
+                    .build();
+            userRepository.save(supervisor);
+            log.info("Test user created (supervisor1 / 123456)");
         }
     }
 }
