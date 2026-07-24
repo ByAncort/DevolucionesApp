@@ -20,6 +20,18 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'cargas/:id',
+    loadComponent: () =>
+      import('./features/cargas/carga-detalle/carga-detalle.component').then(m => m.CargaDetalleComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'cargas',
+    loadComponent: () =>
+      import('./features/cargas/carga-upload/carga-upload.component').then(m => m.CargaUploadComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: '',
     redirectTo: 'solicitudes',
     pathMatch: 'full',

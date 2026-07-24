@@ -2,7 +2,13 @@
   <!-- Header -->
   <header class="bg-white shadow-sm border-b">
     <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-      <h1 class="text-lg font-semibold text-gray-900">Bandeja de Solicitudes</h1>
+      <div class="flex items-center gap-6">
+        <h1 class="text-lg font-semibold text-gray-900">Solicitudes</h1>
+        <nav class="flex items-center gap-1 text-sm">
+          <a routerLink="/solicitudes" class="px-3 py-1.5 rounded-lg font-medium text-blue-600 bg-blue-50">Solicitudes</a>
+          <a routerLink="/cargas" class="px-3 py-1.5 rounded-lg font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100">Carga Masiva</a>
+        </nav>
+      </div>
       <div class="flex items-center gap-4">
         <span class="text-sm text-gray-500">{{ authService.getUserEmail() }}</span>
         <button
